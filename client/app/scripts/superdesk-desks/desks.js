@@ -102,6 +102,8 @@
 
                     var criteria = {source: query.getCriteria()};
 
+                    scope.page = 1;
+                    scope.fetching = false;
                     scope.loading = true;
                     scope.items = scope.total = null;
                     api('archive').query(criteria).then(function(items) {
@@ -119,6 +121,31 @@
                         queryItems();
                     }
                 });
+
+                var container = elem[0];
+                elem.bind('scroll', function() {
+                    if (container.scrollTop + container.offsetHeight >= container.scrollHeight - 120) {
+                        scope.fetchNext();
+                    }
+                });
+                scope.fetchNext = function() {
+                    if (!scope.fetching) {
+                        scope.fetching = true;
+                        scope.page = scope.page + 1;
+                        criteria.source.from = (scope.page - 1) * 25;
+                        scope.loading = true;
+                        api('archive').query(criteria)
+                        .then(function(items) {
+                            scope.items = scope.items.concat(items._items);
+                            scope.fetching = false;
+                        }, function() {
+                            //
+                        })
+                        ['finally'](function() {
+                            scope.loading = false;
+                        });
+                    }
+                };
             }
         };
     }
