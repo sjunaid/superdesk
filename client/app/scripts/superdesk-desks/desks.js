@@ -97,8 +97,9 @@
                 };
 
                 function queryItems(queryString) {
+                    query = search.query({});
                     query.filter({term: {'task.stage': scope.stage}});
-                    query.size(10);
+                    query.size(25);
 
                     if (queryString) {
                         query.filter({query: {query_string: {
@@ -106,6 +107,7 @@
                             lenient: false
                         }}});
                     }
+                    criteria = {source: query.getCriteria()};
                     scope.loading = true;
                     scope.items = scope.total = null;
                     api('archive').query(criteria).then(function(items) {
