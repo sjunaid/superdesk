@@ -231,10 +231,10 @@
                 var UP = -1,
                     DOWN = 1;
 
-                keyboardManager.bind('up', function(e) { scope.move(UP, elem, e); });
-                keyboardManager.bind('down', function(e) { scope.move(DOWN, elem, e); });
+                keyboardManager.bind('up', function(e) { scope.move(UP, e); });
+                keyboardManager.bind('down', function(e) { scope.move(DOWN, e); });
 
-                scope.move = function (diff, elem, e) {
+                scope.move = function (diff, e) {
                     if (scope.selected != null && (scope.selected.task.stage === scope.stage)) {
 
                         if (scope.items) {
