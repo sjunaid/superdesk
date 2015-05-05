@@ -63,9 +63,9 @@
         });
     }
 
-    StageItemListDirective.$inject = ['search', 'api', 'superdesk', 'desks', '$timeout', '$location', '$anchorScroll',
+    StageItemListDirective.$inject = ['search', 'api', 'superdesk', 'desks', '$timeout', '$q', '$location', '$anchorScroll',
     'keyboardManager'];
-    function StageItemListDirective(search, api, superdesk, desks, $timeout, $location, $anchorScroll, keyboardManager) {
+    function StageItemListDirective(search, api, superdesk, desks, $timeout, $q, $location, $anchorScroll, keyboardManager) {
         return {
             templateUrl: 'scripts/superdesk-desks/views/stage-item-list.html',
             scope: {
@@ -171,6 +171,8 @@
                                 scope.loading = false;
                             });
                         }
+                    } else {
+                        return $q.when(false);
                     }
                 };
                 scope.fetchPrevious = function() {
@@ -208,6 +210,8 @@
                         ['finally'](function() {
                             scope.loading = false;
                         });
+                    } else {
+                        return $q.when(false);
                     }
                 };
                 function setNextItems(criteria) {
@@ -242,7 +246,7 @@
                             if (nextIndex < 0) {
                                 clickItem(_.last(scope.items), e);
                             }
-                            if (scope.selected._id !== scope.items[nextIndex]._id) {
+                            if (index !== nextIndex) {
                                 scrollList(scope.items[nextIndex]._id);
                                 clickItem(scope.items[nextIndex], e);
                             }
