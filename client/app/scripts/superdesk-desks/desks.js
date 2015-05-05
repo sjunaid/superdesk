@@ -126,7 +126,6 @@
                 scope.$on('task:stage', function(event, data) {
                     if (data.new_stage === scope.stage || data.old_stage === scope.stage) {
                         queryItems();
-                        console.log('task:stage');
                     }
                 });
 
@@ -179,7 +178,6 @@
                 };
                 scope.fetchPrevious = function() {
                     if (!scope.fetching && scope.page > 2) {
-                        console.log('fetchPrevious');
                         scope.fetching = true;
                         scope.page = scope.page - 1;
                         if (scope.page > 2) {
