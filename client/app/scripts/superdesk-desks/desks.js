@@ -158,7 +158,9 @@
                                 scope.items.splice(0, criteria.source.size);
                             }
                             $timeout(function() {
-                                scope.items = scope.items.concat(scope.cacheNextItems);
+                                if (!_.isEqual(scope.items, scope.cacheNextItems)) {
+                                    scope.items = scope.items.concat(scope.cacheNextItems);
+                                }
                             }, 100);
 
                             api('archive').query(criteria)
