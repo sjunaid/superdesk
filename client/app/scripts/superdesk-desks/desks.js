@@ -481,6 +481,12 @@
         this.searchAll = false;
     }
 
+    function ProductionAggWidgetDirective() {
+        return {
+            templateUrl: 'scripts/superdesk-desks/views/aggregate-widget-production.html',
+            controller: AggregateWidgetCtrl
+        };
+    }
     var app = angular.module('superdesk.desks', [
         'superdesk.users',
         'superdesk.authoring.widgets'
@@ -810,6 +816,7 @@
                 }
             }
         ])
+        .directive('sdProductionAggWidget', ProductionAggWidgetDirective)
         .directive('sdStageItems', StageItemListDirective)
         .directive('sdTaskStatusItems', TaskStatusItemsDirective)
         .directive('sdUserRoleItems', UserRoleItemListDirective)
