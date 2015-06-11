@@ -35,7 +35,7 @@
 
         $scope.privileges = privileges.privileges;
 
-        $scope.views = ['content', 'tasks', 'users'];
+        $scope.views = ['content', 'tasks', 'users', 'messages'];
 
         $scope.view = $scope.views[0];
 
@@ -354,6 +354,10 @@
 
                 scope.closeEditUser = function() {
                     scope.user = null;
+                };
+
+                scope.openMessageUser = function(user) {
+                    scope.user = user;
                 };
             }
         };

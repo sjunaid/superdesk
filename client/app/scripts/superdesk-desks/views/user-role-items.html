@@ -12,7 +12,10 @@
 		<div class="pull-right dropdown" dropdown ng-if="privilege">
 	        <button class="dropdown-toggle animate-icon" dropdown-toggle><i class="icon-dots-vertical"></i></button>
 	        <ul class="dropdown-menu">
-	            <li><button ng-click="openEditUser(item)"><i class="icon-pencil"></i> {{ :: 'Edit user' | translate }}</button></li>
+	            <li>
+	            	<button ng-click="openEditUser(item)"><i class="icon-pencil"></i> {{ :: 'Edit user' | translate }}</button>
+	            	<button ng-click="openMessageUser(item)"><i class="icon-pencil"></i> {{ :: 'Message user' | translate }}</button>
+	            </li>
 	        </ul>
         </div>
 	</li>
