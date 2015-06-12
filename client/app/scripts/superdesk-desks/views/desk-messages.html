@@ -1,0 +1,35 @@
+<div class="messages-dashboard">
+    <div class="list-pane">
+		Users ...........................
+    </div>
+
+    <div class="item-pane">
+    	<div class="notification-list-box" ng-controller="MessagesCtrl">
+		    <ul class="notification-list white">
+		        <li ng-repeat="message in messages" ng-class="{active: message._id === active}">
+		            <figure class="avatar">
+		                <img sd-user-avatar data-src="message.user.picture_url">
+		            </figure>
+		            <div class="content">
+		                <div class="text" sd-message-text data-message="message" data-name="{{message.user.display_name || message.user.username}}" data-text="{{message.text}}"></div>
+		                <span class="date" sd-reldate ng-model="message._created"></span>
+		            </div>
+		        </li>
+
+		        <li class="alert alert-info" ng-show="messages.length === 0" translate>No messages so far. Be the first..</li>
+		        <li class="alert alert-info" ng-show="messages === null" translate>Loading..</li>
+		    </ul>
+		    <div class="add-message">
+		        <form name="messagesForm">
+		            <div sd-user-mentio></div>
+		            <textarea class="new-message" sd-auto-height ng-model="text" mentio id="mentio-users" ng-keyup="saveOnEnter($event)"></textarea>
+		            <div class="actions">
+		                <div class="pull-left post"><input type="checkbox" ng-model="saveEnterFlag"> <span translate>Post on 'Enter'</span></div>
+		                <button class="btn btn-info pull-right" ng-click="save()" ng-show="!saveEnterFlag" translate>Post</button>
+		                <button class="btn pull-right" ng-click="cancel()" ng-show="!saveEnterFlag" translate>Cancel</button>
+		            </div>
+		        </form>
+		    </div>
+		</div>
+    </div>
+</div>

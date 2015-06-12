@@ -1,0 +1,161 @@
+// messages.less
+// Styling for MESSAGES - editor widget
+// ----------------------------------------------------------------------------------------
+@import 'mixins.less';
+@import 'variables.less';
+
+.messages-dashboard {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    padding: 0;
+
+    .subnav {
+        position: absolute;
+        top: 0;
+    }
+
+    .list-pane {
+        position: absolute;
+        top: 0; bottom: 30px;
+        left: 0;
+        width: 20%;
+        border-right: 1px solid #e0e0e0;
+        overflow: hidden;
+        .border-box();     
+    }
+
+    .item-pane {
+        position: absolute;
+        top: 0; bottom: 30px;
+        right: 0;
+        width: 80%;
+        overflow: hidden;
+        float:right;
+
+        /*
+        .main-article {
+            .border-box();
+            height: 100%;
+            padding: 60px 30px 30px;
+        }
+
+        .page-content-container {
+            top: 0;
+            left: 30px;
+            right: 30px;
+            bottom: 0;
+            height: auto;
+        }
+        */
+
+        /* ------- */
+        .widget-content {
+			background: @sd-background;
+		}
+		
+		.notification-list-box {
+			position: absolute;
+			top:12px;
+			bottom: 10px;
+			left: 0; right: 0;
+		}
+
+		.notification-list {
+			position: absolute;
+			bottom: 110px; top: 0; left: 0; right: 0;
+			padding: 0 12px;
+			height: auto;
+			li {
+				.date {
+					margin-top: 3px !important;
+				}
+			}
+		}
+		.add-message {
+			position: absolute;
+			bottom: 0; left: 0; right: 0;
+			.box-sizing(border-box);
+			border-top: 1px solid rgba(255, 255, 255, 0.75);
+			background: #f0f0f0;
+			padding: 10px;
+			.box-shadow(0px -1px 3px 0px rgba(0, 0, 0, 0.12));
+			form {
+				margin:0;
+			}
+			.new-message {
+				border: 2px solid @sd-blue !important;
+				.border-radius(3px) !important;
+			}
+			.actions {
+				height: 30px;
+				margin-top: 10px;
+				.post {
+					margin-top: 5px;
+					.sd-checkbox {
+						vertical-align: middle;
+						margin-top: -2px;
+						margin-right: 0;
+					}
+				}
+			}
+		}
+
+    }
+}
+
+/*
+.sd-widget.comments {
+	
+	.widget-content {
+		background: @sd-background;
+	}
+	
+	.notification-list-box {
+		position: absolute;
+		top:12px;
+		bottom: @authoring-opened-articles + @scratchpad-closed;
+		left: 0; right: 0;
+	}
+
+	.notification-list {
+		position: absolute;
+		bottom: 110px; top: 0; left: 0; right: 0;
+		padding: 0 12px;
+		height: auto;
+		li {
+			.date {
+				margin-top: 3px !important;
+			}
+		}
+	}
+	.add-comment {
+		position: absolute;
+		bottom: 0; left: 0; right: 0;
+		.box-sizing(border-box);
+		border-top: 1px solid rgba(255, 255, 255, 0.75);
+		background: #f0f0f0;
+		padding: 10px;
+		.box-shadow(0px -1px 3px 0px rgba(0, 0, 0, 0.12));
+		form {
+			margin:0;
+		}
+		.new-comment {
+			border: 2px solid @sd-blue !important;
+			.border-radius(3px) !important;
+		}
+		.actions {
+			height: 30px;
+			margin-top: 10px;
+			.post {
+				margin-top: 5px;
+				.sd-checkbox {
+					vertical-align: middle;
+					margin-top: -2px;
+					margin-right: 0;
+				}
+			}
+		}
+	}
+}
+*/
