@@ -365,6 +365,10 @@
 
                 scope.openMessageUser = function(user) {
                     scope.user = user;
+                    var v = _.filter(scope.$parent.views, function(item) {
+                        return item === 'messages';
+                    });
+                    scope.$parent.setView(v[0]);
                 };
             }
         };
@@ -428,7 +432,8 @@
         'superdesk.users',
         'superdesk.authoring.widgets',
         'superdesk.aggregate.widgets',
-        'superdesk.aggregate.sidebar'
+        'superdesk.aggregate.sidebar',
+        'superdesk.desks.messages'
     ]);
 
     var limits = {
