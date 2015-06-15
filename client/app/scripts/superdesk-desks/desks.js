@@ -433,7 +433,7 @@
         'superdesk.authoring.widgets',
         'superdesk.aggregate.widgets',
         'superdesk.aggregate.sidebar',
-        'superdesk.desks.messages'
+        'superdesk.messages.chat'
     ]);
 
     var limits = {

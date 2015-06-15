@@ -116,8 +116,8 @@ function MessageTextDirective($compile) {
     };
 }
 
-angular.module('superdesk.desks.messages', ['mentio', 'superdesk.api'])
-  /*  .config(['apiProvider', function(apiProvider) {
+var msgMod = angular.module('superdesk.messages.chat', ['mentio', 'superdesk.api', 'superdesk.desks', 'superdesk.messages.chat'])
+    /*.config(['apiProvider', function(apiProvider) {
         apiProvider.api('item_comments', {
             type: 'http',
             backend: {rel: 'item_comments'}
@@ -126,5 +126,7 @@ angular.module('superdesk.desks.messages', ['mentio', 'superdesk.api'])
     .controller('MessagesCtrl', MessagesCtrl)
     .service('messagesService', MessagesService)
     .directive('sdMessageText', MessageTextDirective);
+
+    return msgMod;
 
 })();
