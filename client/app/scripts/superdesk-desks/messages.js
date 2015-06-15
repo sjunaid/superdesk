@@ -8,7 +8,7 @@ var ENTER = 13;
 MessagesService.$inject = ['api'];
 function MessagesService(api) {
 
-    this.messages = null;
+    this.session = null;
 
     this.fetch = function(item) {
         var criteria = {
@@ -24,6 +24,17 @@ function MessagesService(api) {
             }));
     };
 
+    this.create_chat_session = function (target) {
+        //var session = {users: [target]};
+        var _sessionObj = {
+            sessionId: '1234',
+            userlist:{name: 'Syed Junaid'}
+        };
+        this.session = _sessionObj;
+        return _sessionObj;
+        //return api.chat_session.save(session);
+    };
+
     this.save = function(message) {
         return api.item_messages.save(message);
     };
@@ -36,6 +47,9 @@ function MessagesCtrl($scope, $routeParams, messagesService, api, $q) {
     $scope.saveEnterFlag = false;
     $scope.$watch('item._id', reload);
     $scope.users = [];
+    $scope.items = {0:['Syed Junaid']};
+    //$scope.users.push(messagesService.session.userlist.name);
+    //console.log($scope.users);
 
     $scope.saveOnEnter = function($event) {
         if (!$scope.saveEnterFlag || $event.keyCode !== ENTER || $event.shiftKey) {
@@ -127,6 +141,6 @@ var msgMod = angular.module('superdesk.messages.chat', ['mentio', 'superdesk.api
     .service('messagesService', MessagesService)
     .directive('sdMessageText', MessageTextDirective);
 
-    return msgMod;
+return msgMod;
 
 })();

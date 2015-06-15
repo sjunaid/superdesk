@@ -328,8 +328,8 @@
         };
     }
 
-    UserRoleItemListDirective.$inject = ['desks', 'usersService'];
-    function UserRoleItemListDirective(desks, usersService) {
+    UserRoleItemListDirective.$inject = ['desks', 'usersService', 'messagesService', '$location'];
+    function UserRoleItemListDirective(desks, usersService, messagesService, $location) {
         return {
             templateUrl: 'scripts/superdesk-desks/views/user-role-items.html',
             scope: {
@@ -368,7 +368,9 @@
                     var v = _.filter(scope.$parent.views, function(item) {
                         return item === 'messages';
                     });
+                    //var sessionObj = messagesService.create_chat_session(user._id);
                     scope.$parent.setView(v[0]);
+                    //$location.url('/desks/messages/sessionid=' + sessionObj.sessionid);
                 };
             }
         };
