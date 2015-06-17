@@ -14,22 +14,147 @@
         position: absolute;
         top: 0;
     }
+    .alert {
+		height: auto !important;
+		.border-radius(0px);
+		border-width: 0 0 1px;
+
+		&.alert-info {
+			border-color: #bce8f1;
+			&:hover {
+				background: #d9edf7;
+			}
+		}
+
+	}
 
     .list-pane {
         position: absolute;
         top: 0; bottom: 30px;
         left: 0;
-        width: 20%;
+        width: 25%;
         border-right: 1px solid #e0e0e0;
         overflow: hidden;
-        .border-box();     
+        .border-box();
+        .list-title {
+			left: 0;
+			line-height: 44px;
+			font-size: 16px;
+			padding: 0 10px;
+			right: 0;
+			float:right;
+		}
+		.item {
+			position: absolute;
+			top:12px;
+			bottom: 10px;
+			left: 0; right: 0;
+			width:100%;
+			vertical-align: center;
+		
+		ul {
+				> li {
+					position: relative;
+					float: left;
+					margin: 5px;
+					border: 1px solid rgba(0,0,0,0);
+					.border-radius(3px);
+					padding: 15px 10px;
+					width: 20%;
+					.avatar {
+						display: block;
+						.border-radius(50%);
+						overflow: hidden;
+						background: #b9b9b9 url('../../images/avatar_64.png') no-repeat;
+						width: 30px;
+						height: 30px;
+						background-size: 100%;
+						float: left;
+						img {
+							width: 100%;
+							height: auto;
+							display: block;
+						}
+					        &.no-bg {
+					            background: @white;
+					            .box-shadow(inset 0 0 0 1px rgba(0,0,0,0.15));
+					        }
+					}
+					.avatar.avatar-with-info {
+						overflow: visible;
+						position: relative;
+						.logged-info {
+							display: block;
+							background-color: #fff;
+							height: 8px;
+							width: 8px;
+							border-radius: 50%;
+							position: absolute;
+							bottom: 0px;
+							right: -4px;
+							box-shadow: 0px 0 0 2px #fff;
+							border: 1px solid #a2c59e;
+							box-sizing: border-box;
+						}
+						.user-image {
+							display: block;
+							.border-radius(50%);
+							overflow: hidden;
+						}
+						&.user-logged {
+							.logged-info {
+								background-color: #67b461;
+								border: 1px solid #67b461;
+							}
+						}
+					}
+					.name {
+						text-align: center;
+						width: 115px;
+						white-space: nowrap;
+						overflow: hidden;
+						text-overflow: ellipsis;
+						.user-close {
+							float:right;
+						}
+					}
+					i {
+						position: absolute;
+						right: 10px; top: 10px;
+						display: none;
+						.opacity(60);
+						&:hover {
+							.opacity(100);
+							cursor: pointer;
+						}
+					}
+					&:hover {
+						i {
+							display: block;
+						}
+						border-color: rgba(0,0,0,0.12);
+						.box-shadow(0 1px 3px 0 rgba(0,0,0,30%));
+					}
+                    &.inactive {
+                      color: #ccc;
+                    }
+				}
+			}
+		}
+		/*.name {
+			text-align: center;
+			width: 115px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}*/
     }
 
     .item-pane {
         position: absolute;
         top: 0; bottom: 30px;
         right: 0;
-        width: 80%;
+        width: 75%;
         overflow: hidden;
         float:right;
 
@@ -103,59 +228,3 @@
 
     }
 }
-
-/*
-.sd-widget.comments {
-	
-	.widget-content {
-		background: @sd-background;
-	}
-	
-	.notification-list-box {
-		position: absolute;
-		top:12px;
-		bottom: @authoring-opened-articles + @scratchpad-closed;
-		left: 0; right: 0;
-	}
-
-	.notification-list {
-		position: absolute;
-		bottom: 110px; top: 0; left: 0; right: 0;
-		padding: 0 12px;
-		height: auto;
-		li {
-			.date {
-				margin-top: 3px !important;
-			}
-		}
-	}
-	.add-comment {
-		position: absolute;
-		bottom: 0; left: 0; right: 0;
-		.box-sizing(border-box);
-		border-top: 1px solid rgba(255, 255, 255, 0.75);
-		background: #f0f0f0;
-		padding: 10px;
-		.box-shadow(0px -1px 3px 0px rgba(0, 0, 0, 0.12));
-		form {
-			margin:0;
-		}
-		.new-comment {
-			border: 2px solid @sd-blue !important;
-			.border-radius(3px) !important;
-		}
-		.actions {
-			height: 30px;
-			margin-top: 10px;
-			.post {
-				margin-top: 5px;
-				.sd-checkbox {
-					vertical-align: middle;
-					margin-top: -2px;
-					margin-right: 0;
-				}
-			}
-		}
-	}
-}
-*/

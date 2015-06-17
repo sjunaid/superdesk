@@ -369,6 +369,7 @@
                         return item === 'messages';
                     });
                     //var sessionObj = messagesService.create_chat_session(user._id);
+                    var sessionObj = messagesService.create_chat_session(user);
                     scope.$parent.setView(v[0]);
                     //$location.url('/desks/messages/sessionid=' + sessionObj.sessionid);
                 };

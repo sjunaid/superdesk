@@ -30,8 +30,9 @@ function MessagesService(api) {
             sessionId: '1234',
             userlist:{name: 'Syed Junaid'}
         };
-        this.session = _sessionObj;
-        return _sessionObj;
+        //this.session = _sessionObj;
+        this.session = target;
+        return this.session;
         //return api.chat_session.save(session);
     };
 
@@ -40,16 +41,33 @@ function MessagesService(api) {
     };
 }
 
-MessagesCtrl.$inject = ['$scope', '$routeParams', 'messagesService', 'api', '$q'];
-function MessagesCtrl($scope, $routeParams, messagesService, api, $q) {
+MessagesCtrl.$inject = ['$scope', '$routeParams', 'messagesService', 'api', '$q', 'usersService'];
+function MessagesCtrl($scope, $routeParams, messagesService, api, $q, usersService) {
 
     $scope.text = null;
     $scope.saveEnterFlag = false;
     $scope.$watch('item._id', reload);
     $scope.users = [];
-    $scope.items = {0:['Syed Junaid']};
-    //$scope.users.push(messagesService.session.userlist.name);
+    $scope.items =  messagesService.session; //{0:['Syed Junaid']};
+    $scope.userslist = [];
+    $scope.userslist.push(messagesService.session);
+    $scope.messages = [];
     //console.log($scope.users);
+
+    $scope.preview = function(user) {
+        //call mesagingService.fetch
+        $scope.messages.push(user);
+    };
+
+    $scope.isLoggedIn = function(user) {
+        return usersService.isLoggedIn(user);
+    };
+
+
+    $scope.removePerson = function(user) {
+        //call mesagingService.fetch
+        $scope.userslist.pop(user);
+    };
 
     $scope.saveOnEnter = function($event) {
         if (!$scope.saveEnterFlag || $event.keyCode !== ENTER || $event.shiftKey) {

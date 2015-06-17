@@ -1,79 +1,67 @@
 <div class="messages-dashboard" ng-controller="MessagesCtrl">
     <div class="list-pane">
-		Users ...........................
-		<div>
-			<ul>
-				<li ng-repeat="item in items" class="item">
-					<div>
-						<button ng-click="preview(item);" tooltip="Preview">{{item[0]}}</button>
-					</div>
-				</li>
-			</ul>
-		</div>
-		<!-- <div class="userslist">
-			<li ng-repeat="user in users" ng-click="select(user)" ng-class="{selected: user === selected, 'inactive' : !user.is_enabled || !user.is_active}">
-			    <figure class="avatar avatar-with-info" ng-class="{'user-logged': isLoggedIn(user)}">
-			        <div class="logged-info"></div>
-			        <div class="user-image">
-			            <img sd-user-avatar data-src="user.picture_url">
-			        </div>
-			    </figure>
+        <div>
+            <ul>
+                <li ng-repeat="user in userslist" class="item">
+                    <!-- <div>
+                        <button class="alert alert-info" ng-click="preview(user);" tooltip="Preview">{{user.display_name}}</button>
+                    </div> -->
+                  <!--   <figure class="avatar"><img sd-user-avatar data-src="user.picture_url"></figure>
+                    <div class="name" ng-click="preview(user);">{{user.display_name}}<i class="icon-close-small" ng-click="removePerson(user)"></i></div> -->
+                      <figure class="avatar avatar-with-info" ng-class="{'user-logged': isLoggedIn(user)}">
+                        <div class="logged-info"></div>
+                        <div class="user-image">
+                            <img sd-user-avatar data-src="user.picture_url">
+                        </div>
+                    </figure>
 
-			    <i class="admin-label icon-settings" ng-if="user.user_type == 'administrator'" tooltip="{{ :: 'admin'|translate}}" tooltip-placement="top"></i>
+                    <i class="admin-label icon-settings" ng-if="user.user_type == 'administrator'" tooltip="{{ :: 'admin'|translate}}" tooltip-placement="top"></i>
 
-			    <div class="row-wrapper" sd-col-width>
-			        <div class="name">
-			        	{{ user.display_name }}
-			            <span class="disabled-label" ng-if="!user.is_enabled" translate>disabled</span>
-			            <span class="disabled-label" ng-if="user.is_enabled && !user.is_active" translate>inactive</span>
-			            <span class="disabled-label" ng-if="user.is_enabled && user.is_active && user.needs_activation" translate>pending</span>
-			        </div>
-			        <div class="username">{{ user.username }}</div>
-			        <div class="role">{{ roles[user.role].name }}</div>
-			        <div class="email">{{ user.email }}</div>
-			        <div class="created">{{ user._created | reldate}}</div>
-			    </div>
+                    <div sd-col-width>
+                        <div class="name" ng-click="preview(user);">
+                            {{ user.display_name }}
+                            <span class="disabled-label" ng-if="!user.is_enabled" translate>disabled</span>
+                            <span class="disabled-label" ng-if="user.is_enabled && !user.is_active" translate>inactive</span>
+                            <span class="disabled-label" ng-if="user.is_enabled && user.is_active && user.needs_activation" translate>pending</span>
+                        </div>
+                        <span class="pull-right"><i class="icon-close-small" ng-click="removePerson(user)"></i></span>
+                        <!-- <div class="username">{{ user.username }}</div>
+                        <div class="role">{{ roles[user.role].name }}</div>
+                        <div class="email">{{ user.email }}</div>
+                        <div class="created">{{ user._created | reldate}}</div> -->
+                    </div>
 
-			    <div class="action">
-			        <ul class="item-functions"
-			            sd-activity-list
-			            data-item="user"
-			            data-type="user"
-			            data-action="edit"
-			            data-done="done">
-			        </ul>
-			    </div>
-			</li>
-		</div> -->
+                </li>
+            </ul>
+        </div>
     </div>
-
     <div class="item-pane">
-    	<div class="notification-list-box">
-		    <ul class="notification-list white">
-		        <li ng-repeat="message in messages" ng-class="{active: message._id === active}">
-		            <figure class="avatar">
-		                <img sd-user-avatar data-src="message.user.picture_url">
-		            </figure>
-		            <div class="content">
-		                <div class="text" sd-message-text data-message="message" data-name="{{message.user.display_name || message.user.username}}" data-text="{{message.text}}"></div>
-		                <span class="date" sd-reldate ng-model="message._created"></span>
-		            </div>
-		        </li>
+        <div class="notification-list-box">
+            <ul class="notification-list white">
+                <li ng-repeat="message in messages" ng-class="{active: message._id === active}">
+                    <figure class="avatar">
+                        <img sd-user-avatar data-src="message.user.picture_url">
+                    </figure>
+                    <div class="content">
+                        <div class="text" sd-message-text data-message="message" data-name="{{message.user.display_name || message.user.username}}" data-text="{{message.text}}"></div>
+                        <span class="date" sd-reldate ng-model="message._created"></span>
+                    </div>
+                </li>
 
-		        <li class="alert alert-info" ng-show="messages.length === 0" translate>No messages so far. Be the first..</li>
-		        <li class="alert alert-info" ng-show="messages === null" translate>Loading..</li>
-		    </ul>
-		    <div class="add-message">
-		        <form name="messagesForm">
-		            <div sd-user-mentio></div>
-		            <textarea class="new-message" sd-auto-height ng-model="text" mentio id="mentio-users" ng-keyup="saveOnEnter($event)"></textarea>
-		            <div class="actions">
-		                <div class="pull-left post"><input type="checkbox" ng-model="saveEnterFlag"> <span translate>Post on 'Enter'</span></div>
-		                <button class="btn btn-info pull-right" ng-click="save()" ng-show="!saveEnterFlag" translate>Post</button>
-		                <button class="btn pull-right" ng-click="cancel()" ng-show="!saveEnterFlag" translate>Cancel</button>
-		            </div>
-		        </form>
-		    </div>
-		</div>
+                <li class="alert alert-info" ng-show="messages.length === 0" translate>No messages so far. Be the first..</li>
+                <li class="alert alert-info" ng-show="messages === null" translate>Loading..</li>
+            </ul>
+            <div class="add-message">
+                <form name="messagesForm">
+                    <div sd-user-mentio></div>
+                    <textarea class="new-message" sd-auto-height ng-model="text" mentio id="mentio-users" ng-keyup="saveOnEnter($event)"></textarea>
+                    <div class="actions">
+                        <div class="pull-left post"><input type="checkbox" ng-model="saveEnterFlag"> <span translate>Post on 'Enter'</span></div>
+                        <button class="btn btn-info pull-right" ng-click="save()" ng-show="!saveEnterFlag" translate>Post</button>
+                        <button class="btn pull-right" ng-click="cancel()" ng-show="!saveEnterFlag" translate>Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
