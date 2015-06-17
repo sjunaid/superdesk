@@ -18,26 +18,31 @@ function MessagesService(api) {
             embedded: {user: 1}
         };
 
-        return api.item_messages.query(criteria)
+        return api.chat_messages.query(criteria)
             .then(angular.bind(this, function(result) {
                 this.messages = result._items;
             }));
     };
 
-    this.create_chat_session = function (target) {
-        //var session = {users: [target]};
-        var _sessionObj = {
-            sessionId: '1234',
-            userlist:{name: 'Syed Junaid'}
-        };
+    this.create_chat_session = function (user) {
+        var session = {users: [user._id]}; // add more user_ids comma separated here to include in session and patch/ PR-719
+
+        // var _sessionObj = {
+        //     sessionId: '1234',
+        //     userlist:{name: 'Syed Junaid'}
+        // };
         //this.session = _sessionObj;
-        this.session = target;
-        return this.session;
-        //return api.chat_session.save(session);
+        
+        var self = this;
+        
+        return api.chat_sessions.save(session)
+        .then(function(new_session) {
+             self.session = new_session;
+        });
     };
 
     this.save = function(message) {
-        return api.item_messages.save(message);
+        return api.chat_messages.save(message);
     };
 }
 
@@ -87,7 +92,7 @@ function MessagesCtrl($scope, $routeParams, messagesService, api, $q, usersServi
 
         messagesService.save({
             text: text,
-            item: $scope.item._id
+            session_id: messagesService.session._id,//$scope.item._id
         }).then(reload);
     };
 
@@ -149,12 +154,16 @@ function MessageTextDirective($compile) {
 }
 
 var msgMod = angular.module('superdesk.messages.chat', ['mentio', 'superdesk.api', 'superdesk.desks', 'superdesk.messages.chat'])
-    /*.config(['apiProvider', function(apiProvider) {
-        apiProvider.api('item_comments', {
+    .config(['apiProvider', function(apiProvider) {
+        apiProvider.api('chat_sessions', {
             type: 'http',
-            backend: {rel: 'item_comments'}
+            backend: {rel: 'chat_sessions'}
         });
-    }])*/
+        apiProvider.api('chat_messages', {
+            type: 'http',
+            backend: {rel: 'chat_messages'}
+        });
+    }])
     .controller('MessagesCtrl', MessagesCtrl)
     .service('messagesService', MessagesService)
     .directive('sdMessageText', MessageTextDirective);
