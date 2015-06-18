@@ -10,13 +10,11 @@ function MessagesService(api) {
 
     this.session = null;
 
-    this.fetch = function(item) {
-        var criteria = {
-            where: {
-                item: item
-            },
-            embedded: {user: 1}
-        };
+    this.fetch = function(sessionId) {
+        var criteria = {};
+        criteria.where = JSON.stringify({
+                chat_session: sessionId
+            });
 
         return api.chat_messages.query(criteria)
             .then(angular.bind(this, function(result) {
@@ -24,20 +22,29 @@ function MessagesService(api) {
             }));
     };
 
+    /*this.fetchAll = function() {
+        var criteria = {};
+        criteria.where = JSON.stringify({
+            chat_session: sessionId
+        });
+
+        return api.chat_messages.query(criteria)
+        .then(angular.bind(this, function(result) {
+            this.messages = result._items;
+        }));
+    };*/
+
     this.create_chat_session = function (user) {
         var session = {users: [user._id]}; // add more user_ids comma separated here to include in session and patch/ PR-719
-
         // var _sessionObj = {
         //     sessionId: '1234',
         //     userlist:{name: 'Syed Junaid'}
         // };
         //this.session = _sessionObj;
-        
         var self = this;
-        
         return api.chat_sessions.save(session)
         .then(function(new_session) {
-             self.session = new_session;
+            self.session = new_session;
         });
     };
 
@@ -46,8 +53,8 @@ function MessagesService(api) {
     };
 }
 
-MessagesCtrl.$inject = ['$scope', '$routeParams', 'messagesService', 'api', '$q', 'usersService'];
-function MessagesCtrl($scope, $routeParams, messagesService, api, $q, usersService) {
+MessagesCtrl.$inject = ['$scope', '$routeParams', 'messagesService', 'api', '$q', 'usersService', 'desks', 'session'];
+function MessagesCtrl($scope, $routeParams, messagesService, api, $q, usersService, desks, session) {
 
     $scope.text = null;
     $scope.saveEnterFlag = false;
@@ -55,7 +62,8 @@ function MessagesCtrl($scope, $routeParams, messagesService, api, $q, usersServi
     $scope.users = [];
     $scope.items =  messagesService.session; //{0:['Syed Junaid']};
     $scope.userslist = [];
-    $scope.userslist.push(messagesService.session);
+    $scope.userslist.push(desks.userLookup[messagesService.session.users]);
+    //$scope.userslist = desks.userLookup[messagesService.session.users];
     $scope.messages = [];
     //console.log($scope.users);
 
@@ -63,12 +71,9 @@ function MessagesCtrl($scope, $routeParams, messagesService, api, $q, usersServi
         //call mesagingService.fetch
         $scope.messages.push(user);
     };
-
     $scope.isLoggedIn = function(user) {
         return usersService.isLoggedIn(user);
     };
-
-
     $scope.removePerson = function(user) {
         //call mesagingService.fetch
         $scope.userslist.pop(user);
@@ -91,9 +96,9 @@ function MessagesCtrl($scope, $routeParams, messagesService, api, $q, usersServi
         $scope.flags = {saving: true};
 
         messagesService.save({
-            text: text,
-            session_id: messagesService.session._id,//$scope.item._id
-        }).then(reload);
+            sender: session.identity._id,
+            message: text,
+            chat_session: messagesService.session._id}).then(reload);
     };
 
     $scope.cancel = function() {
@@ -101,8 +106,8 @@ function MessagesCtrl($scope, $routeParams, messagesService, api, $q, usersServi
     };
 
     function reload() {
-        if ($scope.item) {
-            messagesService.fetch($scope.item._id).then(function() {
+        if (messagesService.session) {
+            messagesService.fetch(messagesService.session._id).then(function() {
                 $scope.messages = messagesService.messages;
             });
         }
