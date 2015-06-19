@@ -1,13 +1,8 @@
 <div class="messages-dashboard" ng-controller="MessagesCtrl">
     <div class="list-pane">
         <div>
-            <ul>
+            <ul class="users-list-embed">
                 <li ng-repeat="user in userslist" class="item">
-                    <!-- <div>
-                        <button class="alert alert-info" ng-click="preview(user);" tooltip="Preview">{{user.display_name}}</button>
-                    </div> -->
-                  <!--   <figure class="avatar"><img sd-user-avatar data-src="user.picture_url"></figure>
-                    <div class="name" ng-click="preview(user);">{{user.display_name}}<i class="icon-close-small" ng-click="removePerson(user)"></i></div> -->
                       <figure class="avatar avatar-with-info" ng-class="{'user-logged': isLoggedIn(user)}">
                         <div class="logged-info"></div>
                         <div class="user-image">
@@ -17,20 +12,17 @@
 
                     <i class="admin-label icon-settings" ng-if="user.user_type == 'administrator'" tooltip="{{ :: 'admin'|translate}}" tooltip-placement="top"></i>
 
-                    <div sd-col-width>
+                    <div class="row-wrapper" sd-col-width>
                         <div class="name" ng-click="preview(user);">
                             {{ user.display_name }}
                             <span class="disabled-label" ng-if="!user.is_enabled" translate>disabled</span>
                             <span class="disabled-label" ng-if="user.is_enabled && !user.is_active" translate>inactive</span>
                             <span class="disabled-label" ng-if="user.is_enabled && user.is_active && user.needs_activation" translate>pending</span>
+                            <span class="pull-right">
+                                <i class="icon-close-small icon-white" ng-click="removePerson(user);"></i>
+                            </span>
                         </div>
-                        <span class="pull-right"><i class="icon-close-small" ng-click="removePerson(user)"></i></span>
-                        <!-- <div class="username">{{ user.username }}</div>
-                        <div class="role">{{ roles[user.role].name }}</div>
-                        <div class="email">{{ user.email }}</div>
-                        <div class="created">{{ user._created | reldate}}</div> -->
                     </div>
-
                 </li>
             </ul>
         </div>
@@ -43,7 +35,7 @@
                         <img sd-user-avatar data-src="message.user.picture_url">
                     </figure>
                     <div class="content">
-                        <div class="text" sd-message-text data-message="message" data-name="{{message.user.display_name || message.user.username}}" data-text="{{message.message}}"></div>
+                        <div class="text" sd-message-text data-message="message" data-name="{{message.sender.display_name}}" data-text="{{message.message}}"></div>
                         <span class="date" sd-reldate ng-model="message._created"></span>
                     </div>
                 </li>

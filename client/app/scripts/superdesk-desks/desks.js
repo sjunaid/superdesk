@@ -368,12 +368,10 @@
                     var v = _.filter(scope.$parent.views, function(item) {
                         return item === 'messages';
                     });
-                    //var sessionObj = messagesService.create_chat_session(user._id);
                     messagesService.create_chat_session(user)
                     .then(function() {
                         scope.$parent.setView(v[0]);
                     });
-                    //$location.url('/desks/messages/sessionid=' + sessionObj.sessionid);
                 };
             }
         };

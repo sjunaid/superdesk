@@ -5,8 +5,8 @@
 
 var ENTER = 13;
 
-MessagesService.$inject = ['api'];
-function MessagesService(api) {
+MessagesService.$inject = ['api', 'desks'];
+function MessagesService(api, desks) {
 
     this.session = null;
 
@@ -18,29 +18,15 @@ function MessagesService(api) {
 
         return api.chat_messages.query(criteria)
             .then(angular.bind(this, function(result) {
+                _.each(result._items, function(msg) {
+                    msg.sender = desks.userLookup[msg.sender];
+                });
                 this.messages = result._items;
             }));
     };
 
-    /*this.fetchAll = function() {
-        var criteria = {};
-        criteria.where = JSON.stringify({
-            chat_session: sessionId
-        });
-
-        return api.chat_messages.query(criteria)
-        .then(angular.bind(this, function(result) {
-            this.messages = result._items;
-        }));
-    };*/
-
     this.create_chat_session = function (user) {
-        var session = {users: [user._id]}; // add more user_ids comma separated here to include in session and patch/ PR-719
-        // var _sessionObj = {
-        //     sessionId: '1234',
-        //     userlist:{name: 'Syed Junaid'}
-        // };
-        //this.session = _sessionObj;
+        var session = {users: [user._id]};
         var self = this;
         return api.chat_sessions.save(session)
         .then(function(new_session) {
@@ -58,24 +44,18 @@ function MessagesCtrl($scope, $routeParams, messagesService, api, $q, usersServi
 
     $scope.text = null;
     $scope.saveEnterFlag = false;
-    $scope.$watch('item._id', reload);
-    $scope.users = [];
-    $scope.items =  messagesService.session; //{0:['Syed Junaid']};
+    $scope.$watch('session._id', reload);
     $scope.userslist = [];
     $scope.userslist.push(desks.userLookup[messagesService.session.users]);
-    //$scope.userslist = desks.userLookup[messagesService.session.users];
     $scope.messages = [];
-    //console.log($scope.users);
 
     $scope.preview = function(user) {
-        //call mesagingService.fetch
-        $scope.messages.push(user);
+        reload();
     };
     $scope.isLoggedIn = function(user) {
         return usersService.isLoggedIn(user);
     };
     $scope.removePerson = function(user) {
-        //call mesagingService.fetch
         $scope.userslist.pop(user);
     };
 
