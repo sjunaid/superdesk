@@ -364,7 +364,6 @@
                 };
 
                 scope.openMessageUser = function(user) {
-                    scope.user = user;
                     var v = _.filter(scope.$parent.views, function(item) {
                         return item === 'messages';
                     });
