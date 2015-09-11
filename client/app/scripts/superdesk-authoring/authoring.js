@@ -1851,8 +1851,8 @@
                 scope.errorMessage = null;
                 var mainEditScope = scope.$parent.$parent;
 
-                scope.$watch('item', function(item) {
-                    if (angular.isDefined(item)) {
+                scope.$watch('item', function(item) {  console.log('in watch');
+                    if (angular.isDefined(item)) { console.log('watching item');
                         item._datelinedate = '';
 
                         if (item.dateline && item.dateline.located != null) {
@@ -1863,6 +1863,12 @@
 
                 metadata.initialize().then(function() {
                     scope.metadata = metadata.values;
+
+                    if (_.isEmpty(scope.item._datelinedate)) { // Setting current date to origItem if its new article/item
+                        scope.origItem.dateline.date = new Date();
+                    }
+                    //initialize month and day controls and dateline.date
+                    setDatelineDate(scope.item);
                 });
 
                 /**
@@ -1875,10 +1881,92 @@
                         item.dateline.text = '';
                         item._datelinedate = '';
                     } else {
+                        scope.origItem.dateline.date = item._datelinedate === '' ? (new Date()) : scope.origItem.dateline.date;
                         item._datelinedate = $filter('formatDatelinesDate')(item.dateline.located, scope.origItem.dateline.date);
                         item.dateline.text = $filter('previewDateline')(item.dateline.located,
                             scope.origItem.dateline.source, scope.origItem.dateline.date);
+
+                        console.log('_datelinedate', item._datelinedate);
+                        console.log('item.dateline.text', item.dateline.text);
+
+                        //update month and day controls and dateline.date
+                        setDatelineDate(item);
                     }
+                };
+
+                function setDatelineDate(item) {
+                    var inputDate;
+                    if (item._datelinedate != null) {
+                        scope.mmSelected = item._datelinedate.split(' ')[0];
+                        scope.ddSelected = item._datelinedate.split(' ')[1];
+                    }
+
+                    inputDate = new Date(scope.mmSelected + scope.ddSelected);
+                    inputDate.setFullYear((new Date()).getFullYear());
+                    item.dateline.date = inputDate;
+                    console.log('setDatelineDate', item.dateline.date);
+                }
+
+                //Typeahead - month
+                scope.mmTerms = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept',
+                    'Oct', 'Nov', 'Dec'];
+                scope.mmSelected = null;
+                scope.mmItems = [];
+
+                scope.mmSearch = function(term) {
+                    scope.mmItems = _.filter(scope.mmTerms, function(t) {
+                        return t.toLowerCase().indexOf(term.toLowerCase()) !== -1;
+                    });
+                    return scope.mmItems;
+                };
+
+                scope.mmSelect = function(term) {
+                    scope.mmSelected = term;
+                };
+
+                scope.validateField = function($event) {
+                    //scope.mmSelected = null;
+                    if ($event.currentTarget.id === 'mm') {
+                        if (!/[a-zA-Z]+/.test(scope.mmSelected)) { // Allow only letter
+                            console.log('month not ok');
+                            scope.mmSelected = null;
+                        }
+                    }
+                    if ($event.currentTarget.id === 'dd') {
+                        if (!/[0-9]+/.test(scope.ddSelected)) { //Allow only number
+                            console.log('day not ok');
+                            scope.ddSelected = null;
+                        }
+                    }
+                };
+
+                //Typeahead - day
+                var currentDate = new Date();
+                scope.totalDays = function() {
+                    // Get number of days based on month + year
+                    var nDays = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate() || 31;
+
+                    var daysList = [];
+                    for (var i = 1; i <= nDays; i++) {
+                        var dd = i.toString();
+                        daysList.push(dd); // Adds a leading 0 if single digit
+                    }
+                    return daysList;
+                };
+
+                scope.ddTerms = scope.totalDays();
+                scope.ddSelected = null;
+                scope.ddItems = [];
+
+                scope.ddSearch = function(term) {
+                    scope.ddItems = _.filter(scope.ddTerms, function(t) {
+                        return t.toLowerCase().indexOf(term.toLowerCase()) !== -1;
+                    });
+                    return scope.ddItems;
+                };
+
+                scope.ddSelect = function(term) {
+                    scope.ddSelected = term;
                 };
 
                 /**

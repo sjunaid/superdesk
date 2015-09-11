@@ -191,6 +191,31 @@ body, html {
 
 	.field {
 		margin-bottom: 10px;
+		.multiple {
+			display: flex;
+			input {
+				color: #333 !important;
+  				font-size: 14px !important;
+  				font-weight: 400 !important;
+				&.ng-invalid {
+					border-color: #b61818 !important;
+				}
+			}
+			.dateline-date {
+				.sd-typeahead {
+					max-width:	50px !important; 
+					float: left !important; 
+					margin-right: 2px !important;
+					border-color: #b61818 !important;
+					.item-list {
+						min-width: 60px !important;
+					}
+					&.input-term {
+                        input { border-color: #b61818 !important; }
+                    }
+				}
+			}
+		}
 	}
 
 	//labels
@@ -356,6 +381,7 @@ body, html {
     	display: flex;
     	font-size: 16px;
     	line-height: 27px;
+    	padding-right: 20px;
     	.text-light();
         .term-editor {
             float: left;
@@ -371,11 +397,11 @@ body, html {
     .body {
       clear: left;
     }
-    .sd-typeahead .item-list ul li {
+    /*.sd-typeahead .item-list ul li {
     	color: #333;
     	font-size: 14px;
     	.text-normal();
-    }
+    }*/
 }
 
 //themes

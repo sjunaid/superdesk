@@ -39,14 +39,27 @@
 </div>
 
 <div class="field">
-    <label translate>Dateline</label>
+  <label translate>Dateline</label>
+  <div class="multiple">
     <div sd-meta-locators class="dateline-info" ng-show="_editable"
          data-list="metadata.cities" data-item="item" data-fieldprefix="dateline" data-field="located"
          data-postprocessing="updateDateline(item, city)" data-change="autosave(item)">
     </div>
-    <div class="dateline-info" ng-show="_editable"> {{item._datelinedate}} </div>
+    <div class="dateline-date">
+      <div id="mm" tabindex="0" ng-keyup="validateField($event);" sd-typeahead items="mmItems" term="mmSelected" search="mmSearch(term)" select="mmSelect(item)"
+          ng-disabled="!_editable || _.contains(['published', 'corrected', 'kill'], item.state)" >
+          <ul>
+            <li typeahead-item="mmItem" ng-repeat="mmItem in mmItems">{{ mmItem}}</li>
+          </ul>
+      </div>
+      <div id="dd" tabindex="1" ng-keyup="validateField($event);" sd-typeahead items="ddItems" term="ddSelected" search="ddSearch(term)" select="ddSelect(item)"
+      ng-disabled="!_editable || _.contains(['published', 'corrected', 'kill'], item.state)" >
+        <ul>
+          <li typeahead-item="ddItem" ng-repeat="ddItem in ddItems">{{ ddItem}}</li>
+        </ul>
+      </div>
+    </div>
 
-    <div ng-show="!_editable">{{ item.dateline.text }}</div>
 </div>
 
 <div class="field body" ng-if="!isMediaType">
