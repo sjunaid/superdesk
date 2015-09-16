@@ -19,7 +19,8 @@ define(['angular'], function(angular) {
          * @scope {Object} term - search term
          * @scope {Boolen} alwaysVisible - list of posible choices always stay visible
          * @scope {Function} search - callback for filtering choice action
-         * @scope {Function} select - callback for select item aciton
+         * @scope {Function} select - callback for select item action
+         * @scope {Function} onblur - callback for on-blur action - can be use to call handler for validation.
          *
          */
         directive('sdTypeahead', ['$timeout', function($timeout) {
@@ -34,7 +35,8 @@ define(['angular'], function(angular) {
                     items: '=',
                     term: '=',
                     alwaysVisible: '=',
-                    disabled: '='
+                    disabled: '=',
+                    onblur: ' &typeaheadOnblur'
                 },
                 controller: ['$scope', function($scope) {
                     $scope.items = [];
@@ -90,7 +92,12 @@ define(['angular'], function(angular) {
                     });
 
                     $input.bind('blur', function() {
-                        scope.$apply(function() { scope.focused = false; });
+                        scope.$apply(function() {
+                            scope.focused = false;
+                            if (typeof scope.onblur === 'function') {
+                                scope.onblur();
+                            }
+                        });
                     });
 
                     $list.bind('mouseover', function() {

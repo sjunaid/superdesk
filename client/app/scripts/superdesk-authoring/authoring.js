@@ -126,21 +126,17 @@
          * Autosave an item
          */
         this.save = function saveAutosave(item) {
-            if (item._editable && item._locked) {
-                this.stop(item);
+            this.stop(item);
+            timeouts[item._id] = $timeout(function() {
+                var diff = extendItem({_id: item._id}, item);
 
-                timeouts[item._id] = $timeout(function() {
-                    var diff = extendItem({_id: item._id}, item);
-
-                    return api.save(RESOURCE, {}, diff).then(function(_autosave) {
-                        extendItem(item, _autosave);
-                        var orig = Object.getPrototypeOf(item);
-                        orig._autosave = _autosave;
-                    });
-                }, AUTOSAVE_TIMEOUT);
-
-                return timeouts[item._id];
-            }
+                return api.save(RESOURCE, {}, diff).then(function(_autosave) {
+                    extendItem(item, _autosave);
+                    var orig = Object.getPrototypeOf(item);
+                    orig._autosave = _autosave;
+                });
+            }, AUTOSAVE_TIMEOUT);
+            return timeouts[item._id];
         };
 
         /**
@@ -273,10 +269,6 @@
 
             if (!diff.publish_schedule) {
                 delete diff.publish_schedule;
-            }
-
-            if (diff.embargo && this.isPublished(orig)) {
-                delete diff.embargo;
             }
 
             //check if rendition is dirty for real
@@ -458,7 +450,6 @@
             (angular.isDefined(current_item.package_type) && current_item.package_type === 'takes');
 
             var lockedByMe = !lock.isLocked(current_item);
-            action.view = !lockedByMe;
 
             // new take should be on the text item that are closed or last take but not killed and doesn't have embargo.
             action.new_take = !is_read_only_state && (current_item.type === 'text' || current_item.type === 'preformatted') &&
@@ -469,13 +460,10 @@
             // item is published state - corrected, published, scheduled, killed
             if (self.isPublished(current_item)) {
                 //if not the last published version
-                if ((angular.isDefined(item.archive_item) &&
-                    item._current_version !== item.archive_item._current_version) ||
-                    (this._versionToFetch && this._versionToFetch !== item._current_version)) {
+                if ((angular.isDefined(item.archive_item) && item._current_version !== item.archive_item._current_version)) {
                     return angular.extend({}, DEFAULT_ACTIONS);
                 }
 
-                action.view = true;
                 if (current_item.state === 'scheduled') {
                     action.deschedule = true;
                 } else if (current_item.state === 'published' || current_item.state === 'corrected') {
@@ -528,27 +516,13 @@
                 if (!desk) {
                     action = angular.extend({}, DEFAULT_ACTIONS);
                 }
-
-                action.duplicate = user_privileges.duplicate &&
-                    !_.contains(['spiked', 'killed'], current_item.state) &&
-                    (angular.isUndefined(current_item.package_type) || current_item.package_type !== 'takes');
+                action.duplicate = user_privileges.duplicate && !is_read_only_state;
             } else {
                 // personal
                 action.copy = true;
-                action.view = false;
-                action.package_item = false;
-                action.new_take = false;
             }
 
             return action;
-        };
-
-        /**
-         * Sometimes the fetched version and user selected version are different. Use this method to set the version
-         * selected by user. This happens when user selects "Open" action.
-         */
-        this.setItemVersion = function(version) {
-            this._versionToFetch = version;
         };
     }
 
@@ -984,12 +958,10 @@
 
                         if (!_.isDate(schedule)) {
                             errorMessage = gettext(fieldName + ' is not a valid date!');
+                        } else if (schedule < _.now()) {
+                            errorMessage = gettext(fieldName + ' cannot be earlier than now!');
                         } else if (!schedule.getTime()) {
                             errorMessage = gettext(fieldName + ' time is invalid!');
-                        } else if (schedule < _.now()) {
-                            if (fieldName !== 'Embargo' || $scope._isInProductionStates) {
-                                errorMessage = gettext(fieldName + ' cannot be earlier than now!');
-                            }
                         }
                     }
 
@@ -1009,6 +981,11 @@
 
                     var errorMessage;
                     if (item.embargo_date || item.embargo_time) {
+                        if (_.contains(['scheduled', 'killed', 'corrected'], item.state)) {
+                            notify.error(gettext('Embargo isn\'t applicable after publishing'));
+                            return false;
+                        }
+
                         errorMessage = validateTimestamp(item.embargo_date, item.embargo_time, item.embargo, 'Embargo');
                         if (errorMessage !== '') {
                             notify.error(errorMessage);
@@ -1083,11 +1060,7 @@
                 $scope.publish = function() {
                     if (validatePublishScheduleAndEmbargo($scope.item)) {
                         if ($scope.dirty) { // save dialog & then publish if confirm
-                            var message = 'publish';
-                            if ($scope.action && $scope.action !== 'edit') {
-                                message = $scope.action;
-                            }
-
+                            var message = $scope.action === 'kill' ? $scope.action : 'publish';
                             authoring.publishConfirmation($scope.origItem, $scope.item, $scope.dirty, message)
                             .then(function(res) {
                                 if (res) {
@@ -1231,6 +1204,9 @@
                     if ($scope.item._id === data.item && !_closing &&
                         session.sessionId !== data.lock_session) {
                         authoring.lock($scope.item, data.user);
+                        if ($scope.action !== 'view') {
+                            $location.url($scope.referrerUrl);
+                        }
                     }
                 });
 
@@ -1242,6 +1218,9 @@
                         $scope.origItem._locked = $scope.item._locked = false;
                         $scope.origItem.lock_session = $scope.item.lock_session = null;
                         $scope.origItem.lock_user = $scope.item.lock_user = null;
+                        if ($scope.action !== 'view') {
+                            $location.url($scope.referrerUrl);
+                        }
                     }
                 });
 
@@ -1445,9 +1424,9 @@
             }
         };
     }
-    SendItem.$inject = ['$q', 'api', 'desks', 'notify', 'authoringWorkspace', 'superdeskFlags',
+    SendItem.$inject = ['$q', 'api', 'desks', 'notify', 'authoringWorkspace',
         '$location', 'macros', '$rootScope', 'authoring', 'send', 'spellcheck', 'confirm'];
-    function SendItem($q, api, desks, notify, authoringWorkspace, superdeskFlags,
+    function SendItem($q, api, desks, notify, authoringWorkspace,
         $location, macros, $rootScope, authoring, send, spellcheck, confirm) {
         return {
             scope: {
@@ -1484,10 +1463,6 @@
                 }
 
                 function activateItem(item) {
-                    if (scope.mode === 'monitoring') {
-                        superdeskFlags.flags.fetching = !!item;
-                    }
-
                     scope.isActive = !!item;
                     activate();
                 }
@@ -1503,10 +1478,6 @@
                 }
 
                 scope.close = function() {
-                    if (scope.mode === 'monitoring') {
-                        superdeskFlags.flags.fetching = false;
-                    }
-
                     if (scope.$parent.views) {
                         scope.$parent.views.send = false;
                     } else {
@@ -1553,18 +1524,6 @@
                     }
                 };
 
-                /*
-                 * Returns true if Destination field and Send button needs to be displayed, false otherwise.
-                 * @returns {Boolean}
-                 */
-                scope.showSendButtonAndDestination = function () {
-                    if (scope.itemActions) {
-                        return scope.mode === 'ingest' ||
-                                scope.mode === 'monitoring' ||
-                                (scope.mode === 'authoring' && scope.isSendEnabled() && scope.itemActions.send);
-                    }
-                };
-
                 /**
                  * Returns true if Publish Schedule needs to be displayed, false otherwise.
                  */
@@ -1578,15 +1537,8 @@
                  * Returns true if Embargo needs to be displayed, false otherwise.
                  */
                 scope.showEmbargo = function() {
-                    var prePublishCondition = scope.mode !== 'ingest' && scope.item &&
-                        scope.item.type !== 'composite' && !scope.item.publish_schedule_date &&
-                        !scope.item.publish_schedule_time;
-
-                    if (prePublishCondition && authoring.isPublished(scope.item)) {
-                        return scope.item.embargo;
-                    }
-
-                    return prePublishCondition;
+                    return scope.mode !== 'ingest' && scope.item && scope.item.type !== 'composite' &&
+                        !scope.item.publish_schedule_date && !scope.item.publish_schedule_time;
                 };
 
                 /**
@@ -1668,9 +1620,8 @@
                             return authoring.linkItem(scope.item, null, activeDeskId);
                         })
                         .then(function (item) {
-                            authoringWorkspace.close();
                             notify.success(gettext('New take created.'));
-                            authoringWorkspace.edit(item);
+                            $location.url('/authoring/' + item._id);
                         }, function(err) {
                             notify.error(gettext('Failed to send and continue.'));
                         });
@@ -1803,18 +1754,7 @@
                 function fetchStages() {
                     if (scope.selectedDesk) {
                         scope.stages = desks.deskStages[scope.selectedDesk._id];
-
-                        var stage = null;
-
-                        if (scope.item.task && scope.item.task.stage) {
-                            stage = _.find(scope.stages, {_id: scope.item.task.stage});
-                        }
-
-                        if (!stage) {
-                            stage = _.find(scope.stages, {_id: scope.selectedDesk.incoming_stage});
-                        }
-
-                        scope.selectedStage = stage;
+                        scope.selectedStage = _.find(scope.stages, {_id: scope.selectedDesk.incoming_stage});
                     }
                 }
 
@@ -1848,27 +1788,34 @@
                 var DEFAULT_ASPECT_RATIO = 4 / 3;
                 scope.limits = authoring.limits;
                 scope.toggleDetails = true;
-                scope.errorMessage = null;
+                scope.errorDate = null;
+                scope.errorMonth = null;
                 var mainEditScope = scope.$parent.$parent;
 
-                scope.$watch('item', function(item) {  console.log('in watch');
-                    if (angular.isDefined(item)) { console.log('watching item');
+                scope.$watch('item', function(item) {
+                    if (angular.isDefined(item)) {
                         item._datelinedate = '';
 
-                        if (item.dateline && item.dateline.located != null) {
+                        //initialize month and day controls and dateline.date
+                        if (angular.isDefined(item.dateline.located) && !_.isNull(item.dateline.located)) {
                             item._datelinedate = $filter('formatDatelinesDate')(item.dateline.located, item.dateline.date);
+                            //update month and day controls and dateline.date
+                            if (item._datelinedate != null) {
+                                scope.mmSelected = item._datelinedate.split(' ')[0];
+                                scope.ddSelected = item._datelinedate.split(' ')[1];
+                            }
+                            scope.selectedDate = item.dateline.date;
                         }
+
+                        //initialize date list.
+                        scope.ddTerms = scope.totalDays();
+                        scope.ddItems = scope.totalDays();
+
                     }
                 });
 
                 metadata.initialize().then(function() {
                     scope.metadata = metadata.values;
-
-                    if (_.isEmpty(scope.item._datelinedate)) { // Setting current date to origItem if its new article/item
-                        scope.origItem.dateline.date = new Date();
-                    }
-                    //initialize month and day controls and dateline.date
-                    setDatelineDate(scope.item);
                 });
 
                 /**
@@ -1881,30 +1828,40 @@
                         item.dateline.text = '';
                         item._datelinedate = '';
                     } else {
-                        scope.origItem.dateline.date = item._datelinedate === '' ? (new Date()) : scope.origItem.dateline.date;
-                        item._datelinedate = $filter('formatDatelinesDate')(item.dateline.located, scope.origItem.dateline.date);
-                        item.dateline.text = $filter('previewDateline')(item.dateline.located,
-                            scope.origItem.dateline.source, scope.origItem.dateline.date);
+                        //scope.city = city;
+                        if (!scope.errorMonth && !scope.errorDate) {
+                            //setDatelineDate(item);  //
+                            //console.log('before filter', scope.selectedDate);
+                            item._datelinedate = $filter('formatDatelinesDate')(item.dateline.located, scope.selectedDate);
+                            item.dateline.text = $filter('previewDateline')(item.dateline.located,
+                                scope.origItem.dateline.source, scope.selectedDate);
 
-                        console.log('_datelinedate', item._datelinedate);
-                        console.log('item.dateline.text', item.dateline.text);
+                            console.log('_datelinedate', item._datelinedate);
+                            console.log('item.dateline.text', item.dateline.text);
 
-                        //update month and day controls and dateline.date
-                        setDatelineDate(item);
+                            //update month and day controls and dateline.date
+                            if (item._datelinedate != null) {
+                                scope.mmSelected = item._datelinedate.split(' ')[0];
+                                scope.ddSelected = item._datelinedate.split(' ')[1];
+                            }
+
+                            //setDatelineDate(item);
+                        }
                     }
                 };
 
                 function setDatelineDate(item) {
-                    var inputDate;
-                    if (item._datelinedate != null) {
-                        scope.mmSelected = item._datelinedate.split(' ')[0];
-                        scope.ddSelected = item._datelinedate.split(' ')[1];
-                    }
+                    if (scope.mmSelected != null && scope.ddSelected != null) {
+                        var inputDate = new Date(scope.mmSelected + scope.ddSelected);
 
-                    inputDate = new Date(scope.mmSelected + scope.ddSelected);
-                    inputDate.setFullYear((new Date()).getFullYear());
-                    item.dateline.date = inputDate;
-                    console.log('setDatelineDate', item.dateline.date);
+                        item.dateline.date = $filter('tzSpecificDateline')(item.dateline.located,
+                            inputDate.getMonth(), inputDate.getDate());
+                        scope.selectedDate = item.dateline.date;
+
+                        if (!mainEditScope.dirty) {
+                            mainEditScope.dirty = true;
+                        }
+                    }
                 }
 
                 //Typeahead - month
@@ -1924,39 +1881,83 @@
                     scope.mmSelected = term;
                 };
 
-                scope.validateField = function($event) {
-                    //scope.mmSelected = null;
-                    if ($event.currentTarget.id === 'mm') {
-                        if (!/[a-zA-Z]+/.test(scope.mmSelected)) { // Allow only letter
-                            console.log('month not ok');
-                            scope.mmSelected = null;
-                        }
+                var handle;
+                scope.validateMonthHandler = function() {
+                    if (handle) {
+                        $timeout.cancel(handle);
                     }
-                    if ($event.currentTarget.id === 'dd') {
-                        if (!/[0-9]+/.test(scope.ddSelected)) { //Allow only number
-                            console.log('day not ok');
-                            scope.ddSelected = null;
-                        }
-                    }
+                    handle = $timeout(validateMonth, 300);
                 };
+                function validateMonth() {
+                    var validEntry = _.filter(scope.mmTerms, function(mmItem) {
+                        if (scope.mmSelected != null) {
+                            if (mmItem.toLowerCase() === scope.mmSelected.toLowerCase()) { // Month found
+                                scope.mmSelected = mmItem;
+                                return scope.mmSelected;
+                            }
+                        }
+                    });
+
+                    if (_.isEmpty(validEntry)) {
+                        scope.errorMonth = 'Invalid month';
+                        scope.mmSelected = null;
+                        mainEditScope.dirty = false;
+                    } else {
+                        scope.ddTerms = scope.totalDays();
+                        scope.ddItems = scope.totalDays();
+                        scope.errorMonth = null;
+                        var orig = _.create(scope.item);
+                        var diff = orig.dateline;
+                        scope.item.dateline = _.merge(orig, diff);
+                        //scope.updateDateline(scope.item, scope.city);
+                        setDatelineDate(orig);
+                    }
+                }
+
+                scope.validateDayHandler = function() {
+                    if (handle) {
+                        $timeout.cancel(handle);
+                    }
+                    handle = $timeout(validateDay, 300);
+                };
+                function validateDay() {
+                    var validEntry = _.filter(scope.ddTerms, function(ddItem) { // Date found
+                        if (scope.ddSelected != null) {
+                            if (ddItem === scope.ddSelected) {
+                                scope.ddSelected = ddItem;
+                                return scope.ddSelected;
+                            }
+                        }
+                    });
+
+                    if (_.isEmpty(validEntry)) {
+                        scope.errorDate = 'Invalid date';
+                        scope.ddSelected = null;
+                        mainEditScope.dirty = false;
+                    } else {
+                        scope.errorDate = null;
+                        var orig = _.create(scope.item);
+                        var diff = orig.dateline;
+                        scope.item.dateline = _.merge(orig, diff);
+                        //scope.updateDateline(scope.item, scope.city);
+                        setDatelineDate(orig);
+                    }
+                }
 
                 //Typeahead - day
-                var currentDate = new Date();
+                scope.ddSelected = null;
                 scope.totalDays = function() {
+                    var _mockdate = new Date(scope.mmSelected + 1);
                     // Get number of days based on month + year
-                    var nDays = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate() || 31;
+                    var nDays = new Date((new Date()).getFullYear(), _mockdate.getMonth() + 1, 0).getDate() || 31;
 
                     var daysList = [];
                     for (var i = 1; i <= nDays; i++) {
                         var dd = i.toString();
-                        daysList.push(dd); // Adds a leading 0 if single digit
+                        daysList.push(dd);
                     }
                     return daysList;
                 };
-
-                scope.ddTerms = scope.totalDays();
-                scope.ddSelected = null;
-                scope.ddItems = [];
 
                 scope.ddSearch = function(term) {
                     scope.ddItems = _.filter(scope.ddTerms, function(t) {
@@ -2108,20 +2109,17 @@
                     privileges: {correct: 1}
                 })
                 .activity('view.item', {
-                    label: gettext('Open'),
+                    label: gettext('View item'),
                     priority: 2000,
                     icon: 'fullscreen',
                     controller: ['data', 'authoringWorkspace', function(data, authoringWorkspace) {
-                        authoringWorkspace.view(data.item || data);
+                        authoringWorkspace.view(data.item);
                     }],
                     filters: [
                         {action: 'list', type: 'archive'},
                         {action: 'list', type: 'legal_archive'},
                         {action: 'view', type: 'item'}
-                    ],
-                    additionalCondition:['authoring', 'item', function(authoring, item) {
-                        return authoring.itemActions(item).view;
-                    }],
+                    ]
                 })
                 .activity('edit.crop', {
                     label: gettext('EDIT CROP'),
@@ -2273,7 +2271,6 @@
          * @param {Object} item
          */
         this.view = function(item) {
-            authoring.setItemVersion(item._current_version);
             self.edit(item, 'view');
         };
 

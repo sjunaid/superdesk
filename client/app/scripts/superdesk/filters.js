@@ -137,6 +137,12 @@ define([
                 }
             };
         })
+        .filter('tzSpecificDateline', function() {
+            return function(located, inputMonth, inputDate) {
+                var _inputDate = moment().date(inputDate).month(inputMonth).format('YYYY-MM-DD hh:mm:ss');
+                return moment.tz(_inputDate, located.tz).toISOString();
+            };
+        })
         .filter('previewDateline', ['$filter', function($filter) {
             return function(located, source, datelineDate) {
                 if (angular.isUndefined(source)) {

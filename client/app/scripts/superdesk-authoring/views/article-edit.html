@@ -46,18 +46,22 @@
          data-postprocessing="updateDateline(item, city)" data-change="autosave(item)">
     </div>
     <div class="dateline-date">
-      <div id="mm" tabindex="0" ng-keyup="validateField($event);" sd-typeahead items="mmItems" term="mmSelected" search="mmSearch(term)" select="mmSelect(item)"
-          ng-disabled="!_editable || _.contains(['published', 'corrected', 'kill'], item.state)" >
+      <div id="mm" typeahead-onblur="validateMonthHandler();" sd-typeahead items="mmItems" 
+      term="mmSelected" search="mmSearch(term)" select="mmSelect(item)" 
+      ng-disabled="!_editable || _.contains(['published', 'scheduled', 'corrected', 'kill'], item.state)" >
           <ul>
             <li typeahead-item="mmItem" ng-repeat="mmItem in mmItems">{{ mmItem}}</li>
           </ul>
       </div>
-      <div id="dd" tabindex="1" ng-keyup="validateField($event);" sd-typeahead items="ddItems" term="ddSelected" search="ddSearch(term)" select="ddSelect(item)"
-      ng-disabled="!_editable || _.contains(['published', 'corrected', 'kill'], item.state)" >
+      <div id="dd" typeahead-onblur="validateDayHandler();" sd-typeahead items="ddItems" term="ddSelected" 
+      search="ddSearch(term)" select="ddSelect(item)"
+      ng-disabled="!_editable || _.contains(['published', 'scheduled', 'corrected', 'kill'], item.state)" >
         <ul>
           <li typeahead-item="ddItem" ng-repeat="ddItem in ddItems">{{ ddItem}}</li>
         </ul>
       </div>
+      <div ng-if="errorDate" class="in-valid">{{errorDate}}</div>
+      <div ng-if="errorMonth" class="in-valid">{{errorMonth}}</div>
     </div>
 
 </div>

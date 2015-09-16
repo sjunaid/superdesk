@@ -193,15 +193,14 @@ body, html {
 		margin-bottom: 10px;
 		.multiple {
 			display: flex;
+			margin-bottom: 10px;
 			input {
 				color: #333 !important;
   				font-size: 14px !important;
   				font-weight: 400 !important;
-				&.ng-invalid {
-					border-color: #b61818 !important;
-				}
 			}
 			.dateline-date {
+				width: 100%;
 				.sd-typeahead {
 					max-width:	50px !important; 
 					float: left !important; 
@@ -210,9 +209,15 @@ body, html {
 					.item-list {
 						min-width: 60px !important;
 					}
-					&.input-term {
-                        input { border-color: #b61818 !important; }
-                    }
+				}
+				.in-valid {
+					font-size: 11px;
+					font-style: italic;
+					color: #D33C30;
+					margin-left: 5px;
+					float: right;
+					.transition(all ease 0.2s);
+					.text-semibold();
 				}
 			}
 		}
